@@ -1,0 +1,9 @@
+{
+  "globals": {
+    "devLog": true,
+    "error": true,
+    "info": true,
+    "log": true,
+    "warn": true
+  }
+}
