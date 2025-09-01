@@ -1,15 +1,16 @@
-import { importPKCS8, importSPKI, SignJWT, jwtVerify, exportJWK } from "jose";
+import { importPKCS8, importSPKI, SignJWT, jwtVerify, exportJWK, createRemoteJWKSet, KeyLike } from "jose";
 
 const ALG = "RS256";
 const ISS = process.env.JWT_ISSUER!; // 예: https://api.example.com
 const ACCESS_TTL_SEC = +(process.env.ACCESS_TTL_SEC ?? 1200); // 20m
 
 // PEM 문자열을 env로 주입
-const PRIVATE_PEM = process.env.AUTH_PRIVATE_KEY_PEM!;
-const PUBLIC_PEM  = process.env.AUTH_PUBLIC_KEY_PEM!;
+const PRIVATE_PEM = (process.env.AUTH_PRIVATE_KEY_PEM || '').replace(/\\n/g, '\n');
+const PUBLIC_PEM  = (process.env.AUTH_PUBLIC_KEY_PEM  || '').replace(/\\n/g, '\n');
+const ecpJWKS = process.env.ECP_JWKS_URL ? createRemoteJWKSet(new URL(process.env.ECP_JWKS_URL)) : null;
 
-let _priv: CryptoKey | null = null;
-let _pub: CryptoKey | null = null;
+let _priv: KeyLike | null = null;
+let _pub:  KeyLike | null = null;
 
 export async function getPrivateKey() {
   if (!_priv) _priv = await importPKCS8(PRIVATE_PEM, ALG);
@@ -40,4 +41,13 @@ export async function publicJwk() {
   const pub = await getPublicKey();
   const jwk = await exportJWK(pub);
   return { keys: [{ ...jwk, alg: ALG, use: "sig", kid: "auth-rs256-1", kty: "RSA" }] };
+}
+
+export async function verifyExternalToken(ecpToken: string) {
+  if (!ecpJWKS) throw new Error('ECP_JWKS_URL not configured');
+  const { payload, protectedHeader } = await jwtVerify(ecpToken, ecpJWKS, {
+    issuer: process.env.ECP_ISS,
+    audience: process.env.ECP_AUD, // 필요 없으면 제거
+  });
+  return { claims: payload, header: protectedHeader };
 }

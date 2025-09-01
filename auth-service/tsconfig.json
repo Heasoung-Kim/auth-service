@@ -1,9 +1,11 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
+    "target": "ES2020",
     "useDefineForClassFields": true,
     "module": "ESNext",
     "moduleResolution": "Node",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "types": [
       "vite/client",
       "element-plus/global"
@@ -37,7 +39,9 @@
       ],
       "@api/*": [
         "src/api/*"
-      ]
+      ],
+      "@services/*": ["services/*"],
+      "@http/*": ["http/*"]
     },
     "allowJs": true,
     "incremental": true,

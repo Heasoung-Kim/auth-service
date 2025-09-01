@@ -1,9 +1,14 @@
 {
   "pages": {
-    "/api/health/route": [
+    "/api/auth/login/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/health/route.js"
+      "static/chunks/app/api/auth/login/route.js"
+    ],
+    "/api/jwks/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/jwks/route.js"
     ]
   }
 }
